@@ -1,31 +1,37 @@
+// webpack.config.client.production.js
+
 const path = require('path')
-const CURRENT_WORKING_DIR = process.cwd()
 
-const config = {
-    mode: "production",
-    entry: [
-        path.join(CURRENT_WORKING_DIR, 'client/main.js')
-    ],
-    output: {
-        path: path.join(CURRENT_WORKING_DIR , '/dist'),
-        filename: 'bundle.js',
-        publicPath: "/dist/"
-    },
-    module: {
-        rules: [
-            {
-                test: /\.jsx?$/,
-                exclude: /node_modules/,
-                use: [
-                    'babel-loader'
-                ]
-            },
-            {
-                test: /\.(ttf|eot|svg|gif|jpg|png)(\?[\s\S]+)?$/,
-                use: 'file-loader'
-            }
-        ]
-    }
+module.exports = {
+  mode: 'production',
+  // ← change entry from the non-existent index.js to your main.js
+  entry: path.resolve(__dirname, 'client', 'main.js'),
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js',
+    publicPath: '/dist/'
+  },
+  module: {
+    rules: [
+      // Transpile your React and JS
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader'
+      },
+      // Handle images imported in your client code
+      {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        loader: 'file-loader',
+        options: {
+          name: '[name].[contenthash].[ext]',
+          outputPath: 'assets/images',
+          publicPath: '/dist/assets/images'
+        }
+      }
+    ]
+  },
+  resolve: {
+    extensions: ['.js', '.jsx', '.json']
+  }
 }
-
-module.exports = config

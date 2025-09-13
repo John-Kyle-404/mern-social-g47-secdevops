@@ -1,20 +1,6 @@
 version: "3"
 
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: mern-frontend
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    networks:
-      - frontend
-    depends_on:
-      - mern-backend
-
   mern-backend:
     build:
       context: .
@@ -29,43 +15,72 @@ services:
       - backend
       - frontend
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/auth
+      - JWT_SECRET=your_jwt_secret
+      - MONGODB_URI=mongodb://admin:pass@mongodb:27017/auth?authSource=admin
 
   mongo:
+    image: mongo:4.4
     container_name: mongodb
-    image: mongo
     restart: unless-stopped
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_DATABASE=auth
       - MONGO_INITDB_ROOT_PASSWORD=pass
-    networks:
-      - backend
-    ports:
-      - '27017:27017'
+      - MONGO_INITDB_DATABASE=auth
     volumes:
       - mongodata:/data/db
+    networks:
+      - backend
 
   mongo-express:
-    container_name: mongo-express
     image: mongo-express
+    container_name: mongo-express
     restart: unless-stopped
     depends_on:
       - mongo
-    networks:
-      - backend
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb
-      - ME_CONFIG_BASICAUTH_USERNAME=user
-      - ME_CONFIG_BASICAUTH_PASSWORD=1234
       - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
       - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
+      - ME_CONFIG_BASICAUTH_USERNAME=user
+      - ME_CONFIG_BASICAUTH_PASSWORD=1234
       - ME_CONFIG_MONGODB_PORT=27017
+    networks:
+      - backend
     ports:
-      - '8081:8081'
+      - "8081:8081"
+
+  mern-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: mern-frontend
+    restart: unless-stopped
+    networks:
+      - frontend
+    environment:
+      - REACT_APP_API_URL=/api
+
+  mern-proxy:
+    image: nginx:1.23-alpine
+    container_name: mern-proxy
+    restart: unless-stopped
+    depends_on:
+      - mern-backend
+      - mern-frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/ssl:ro
+      - frontend_build:/usr/share/nginx/html:ro
+    networks:
+      - frontend
+      - backend
 
 volumes:
   mongodata:
+  frontend_build:
 
 networks:
   frontend:

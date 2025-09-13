@@ -1,17 +1,19 @@
-import config from './../config/config'
-import app from './express'
 import mongoose from 'mongoose'
+import app from './express'
+import config from '../config/config' 
 
-// Connection URL
-mongoose.Promise = global.Promise
-mongoose.connect(config.mongoUri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false })
-mongoose.connection.on('error', () => {
-  throw new Error(`unable to connect to database: ${config.mongoUri}`)
-})
-
-app.listen(config.port, (err) => {
-  if (err) {
-    console.log(err)
-  }
-  console.info('Server started on port %s.', config.port)
-})
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => {
+    console.log(`Connected to MongoDB at ${process.env.MONGODB_URI}`)
+    app.listen(config.port, () => {
+      console.log(`Express server listening on port ${config.port}`)
+    })
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err)
+    process.exit(1)
+  })
