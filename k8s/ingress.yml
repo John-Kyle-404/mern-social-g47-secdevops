@@ -16,13 +16,13 @@ spec:
   - host: mern-app.local
     http:
       paths:
-      - path: /api
+      - path: /signin
         pathType: Prefix
         backend:
           service:
-            name: backend-service
+            name: frontend-service
             port:
-              number: 3000
+              number: 80
       - path: /mongo-express
         pathType: Prefix
         backend:
@@ -30,6 +30,13 @@ spec:
             name: mongo-express-service
             port:
               number: 8081
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 3000
       - path: /
         pathType: Prefix
         backend:
