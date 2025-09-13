@@ -1,2 +1,0 @@
-worker_process 1;
-events {worker_connecions 1024; }
