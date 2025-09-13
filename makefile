@@ -11,8 +11,8 @@ setup:
 
 build:
 	eval $$(minikube docker-env) && \
-	docker build -f Dockerfile.frontend -t $(FRONTEND_IMAGE) . && \
-	docker build -f Dockerfile.backend -t $(BACKEND_IMAGE) .
+	docker build -f docker/Dockerfile.frontend -t $(FRONTEND_IMAGE) . && \
+	docker build -f docker/Dockerfile.backend -t $(BACKEND_IMAGE) .
 
 deploy:
 	kubectl apply -f $(K8S_DIR)/mongo-deployment.yml
