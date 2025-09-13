@@ -11,13 +11,13 @@ import IconButton from '@material-ui/core/IconButton'
 import Typography from '@material-ui/core/Typography'
 import Edit from '@material-ui/icons/Edit'
 import Divider from '@material-ui/core/Divider'
-import DeleteUser from './DeleteUser'
-import auth from './../auth/auth-helper'
+import DeleteUser from './DeleteUser.js'
+import auth from '../auth/auth-helper.js'
 import {read} from './api-user.js'
 import {Redirect, Link} from 'react-router-dom'
-import FollowProfileButton from './../user/FollowProfileButton'
-import ProfileTabs from './../user/ProfileTabs'
-import {listByUser} from './../post/api-post.js'
+import FollowProfileButton from './FollowProfileButton.js'
+import ProfileTabs from './ProfileTabs.js'
+import {listByUser} from '../post/api-post.js'
 
 const useStyles = makeStyles(theme => ({
   root: theme.mixins.gutters({

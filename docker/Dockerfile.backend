@@ -4,11 +4,13 @@ RUN mkdir -p /app
  
 WORKDIR /app
  
-COPY package.json .
+# UPDATED
+COPY mern-social/package.json .
  
 RUN npm install
- 
-COPY . .
+
+# UPDATED
+COPY mern-social/ .
 
 RUN npm run build
 

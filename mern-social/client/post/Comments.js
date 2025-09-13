@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import auth from './../auth/auth-helper'
+import auth from '../auth/auth-helper.js'
 import CardHeader from '@material-ui/core/CardHeader'
 import TextField from '@material-ui/core/TextField'
 import Avatar from '@material-ui/core/Avatar'
