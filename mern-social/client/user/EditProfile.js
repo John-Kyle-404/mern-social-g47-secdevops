@@ -9,7 +9,7 @@ import Icon from '@material-ui/core/Icon'
 import Avatar from '@material-ui/core/Avatar'
 import FileUpload from '@material-ui/icons/AddPhotoAlternate'
 import { makeStyles } from '@material-ui/core/styles'
-import auth from './../auth/auth-helper'
+import auth from '../auth/auth-helper.js'
 import {read, update} from './api-user.js'
 import {Redirect} from 'react-router-dom'
 
