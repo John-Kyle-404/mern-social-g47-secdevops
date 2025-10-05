@@ -29,11 +29,7 @@ services:
       - backend
       - frontend
     environment:
-<<<<<<< HEAD
-      - MONGODB_URI=mongodb://mongodb:27017/auth
-=======
       - MONGODB_URI=mongodb://admin:pass@mongodb:27017/auth?authSource=admin
->>>>>>> 6ef44bd19680cdfdbde0b0551697e5042064419c
 
   mongo:
     container_name: mongodb
