@@ -1,0 +1,179 @@
+# MongoDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "admin"
+        - name: MONGO_INITDB_DATABASE
+          value: "auth"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: "pass"
+        volumeMounts:
+        - name: mongo-storage
+          mountPath: /data/db
+      volumes:
+      - name: mongo-storage
+        emptyDir: {}
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - port: 27017
+    targetPort: 27017
+  type: ClusterIP
+---
+# Mongo Express Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express-deployment
+  labels:
+    app: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+      - name: mongo-express
+        image: mongo-express:latest
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_SERVER
+          value: "mongo-service"
+        - name: ME_CONFIG_BASICAUTH_USERNAME
+          value: "user"
+        - name: ME_CONFIG_BASICAUTH_PASSWORD
+          value: "1234"
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          value: "admin"
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          value: "pass"
+        - name: ME_CONFIG_MONGODB_PORT
+          value: "27017"
+---
+# Mongo Express Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express-service
+spec:
+  selector:
+    app: mongo-express
+  ports:
+  - port: 8081
+    targetPort: 8081
+  type: ClusterIP
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: mern-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mern-backend
+  template:
+    metadata:
+      labels:
+        app: mern-backend
+    spec:
+      containers:
+      - name: mern-backend
+        image: mern-social-g47-secdevops-mern-backend:latest
+        imagePullPolicy: Never  # Use local image
+        ports:
+        - containerPort: 3000
+        env:
+        - name: MONGODB_URI
+          value: "mongodb://mongo-service:27017/auth"
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: mern-backend
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: ClusterIP
+---
+# Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: mern-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mern-frontend
+  template:
+    metadata:
+      labels:
+        app: mern-frontend
+    spec:
+      containers:
+      - name: mern-frontend
+        image: mern-social-g47-secdevops-frontend:latest
+        imagePullPolicy: Never  # Use local image
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: mern-frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: https
+    port: 443
+    targetPort: 443
+  type: ClusterIP

@@ -12,7 +12,7 @@ import IconButton from '@material-ui/core/IconButton'
 import Typography from '@material-ui/core/Typography'
 import {Link} from 'react-router-dom'
 import {findPeople, follow} from './api-user.js'
-import auth from './../auth/auth-helper'
+import auth from '../auth/auth-helper.js'
 import Snackbar from '@material-ui/core/Snackbar'
 import ViewIcon from '@material-ui/icons/Visibility'
 

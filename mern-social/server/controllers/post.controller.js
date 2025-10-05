@@ -1,5 +1,5 @@
 import Post from '../models/post.model'
-import errorHandler from './../helpers/dbErrorHandler'
+import errorHandler from '../helpers/dbErrorHandler'
 import formidable from 'formidable'
 import fs from 'fs'
 

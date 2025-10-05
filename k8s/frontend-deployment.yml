@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: mern-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mern-frontend
+  template:
+    metadata:
+      labels:
+        app: mern-frontend
+    spec:
+      containers:
+      - name: mern-frontend
+        image: mern-social-g47-secdevops-frontend:latest
+        imagePullPolicy: Never  # Use local image
+        ports:
+        - containerPort: 80
+        - containerPort: 443

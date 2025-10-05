@@ -1,0 +1,72 @@
+version: "3"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: mern-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - frontend
+    depends_on:
+      - mern-backend
+
+  mern-backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: mern-backend
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+      - frontend
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/auth
+
+  mongo:
+    container_name: mongodb
+    image: mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_DATABASE=auth
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+    networks:
+      - backend
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodata:/data/db
+
+  mongo-express:
+    container_name: mongo-express
+    image: mongo-express
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    networks:
+      - backend
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_BASICAUTH_USERNAME=user
+      - ME_CONFIG_BASICAUTH_PASSWORD=1234
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
+      - ME_CONFIG_MONGODB_PORT=27017
+    ports:
+      - '8081:8081'
+
+volumes:
+  mongodata:
+
+networks:
+  frontend:
+  backend:

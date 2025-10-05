@@ -1,58 +1,111 @@
-# MERN Social 2.0
-- *Looking for the first edition code? [Check here](https://github.com/shamahoque/mern-social/tree/master)*
+# Handover Notes
 
-A simple social media application with users, posts, likes and comments - developed using React, Node, Express and MongoDB. 
+- Separated docker, kube, and mern-social files.
+- Created yml files listed in kube handover notes.
+- Created makefile for lab demo.
 
-![MERN Social](https://s3.amazonaws.com/mernbook/git+/social.png "MERN Social")
+## Install Minikube and kubectl
 
-### [Live Demo](http://social2.mernbook.com/ "MERN Social")
+```bash
+# Install kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
 
-#### What you need to run this code
-1. Node (13.12.0)
-2. NPM (6.14.4) or Yarn (1.22.4)
-3. MongoDB (4.2.0)
+# Install Minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
-####  How to run this code
-1. Make sure MongoDB is running on your system 
-2. Clone this repository
-3. Open command line in the cloned folder,
-   - To install dependencies, run ```  npm install  ``` or ``` yarn ```
-   - To run the application for development, run ```  npm run development  ``` or ``` yarn development ```
-4. Open [localhost:3000](http://localhost:3000/) in the browser
----- 
-### More applications built using this stack
+# Start Minikube with Ingress
+minikube start --driver=docker
+minikube addons enable ingress
+```
 
-* [MERN Skeleton](https://github.com/shamahoque/mern-social/tree/second-edition)
-* [MERN Classroom](https://github.com/shamahoque/mern-classroom)
-* [MERN Marketplace](https://github.com/shamahoque/mern-marketplace/tree/second-edition)
-* [MERN Expense Tracker](https://github.com/shamahoque/mern-expense-tracker)
-* [MERN Mediastream](https://github.com/shamahoque/mern-mediastream/tree/second-edition)
-* [MERN VR Game](https://github.com/shamahoque/mern-vrgame/tree/second-edition)
+## Build Docker Images in Minikube
 
-Learn more at [mernbook.com](http://www.mernbook.com/)
+```bash
+# Configure Docker to use Minikube
+eval $(minikube docker-env)
 
-----
-## Get the book
-#### [Full-Stack React Projects - Second Edition](https://www.packtpub.com/web-development/full-stack-react-projects-second-edition)
-*Learn MERN stack development by building modern web apps using MongoDB, Express, React, and Node.js*
+# Build images from project root
+docker build -f Dockerfile.frontend -t mern-social-g47-secdevops-frontend .
+docker build -f Dockerfile.backend -t mern-social-g47-secdevops-mern-backend .
 
-<a href="https://www.packtpub.com/web-development/full-stack-react-projects-second-edition"><img src="https://mernbook.s3.amazonaws.com/git+/Book_2Ed.jpg" align="center" width="400" alt="Full-Stack React Projects"></a>
+# Verify images
+docker images
+```
 
-React combined with industry-tested, server-side technologies, such as Node, Express, and MongoDB, enables you to develop and deploy robust real-world full-stack web apps. This updated second edition focuses on the latest versions and conventions of the technologies in this stack, along with their new features such as Hooks in React and async/await in JavaScript. The book also explores advanced topics such as implementing real-time bidding, a web-based classroom app, and data visualization in an expense tracking app.
+## Deploy Services
 
-Full-Stack React Projects will take you through the process of preparing the development environment for MERN stack-based web development, creating a basic skeleton app, and extending it to build six different web apps. You'll build apps for social media, classrooms, media streaming, online marketplaces with real-time bidding, and web-based games with virtual reality features. Throughout the book, you'll learn how MERN stack web development works, extend its capabilities for complex features, and gain actionable insights into creating MERN-based apps, along with exploring industry best practices to meet the ever-increasing demands of the real world.
+```bash
+# Deploy MongoDB (backend dependency)
+kubectl apply -f k8s/mongo-deployment.yml
+kubectl apply -f k8s/mongo-service.yml
 
-Things you'll learn in this book:
+# Deploy backend (frontend dependency)  
+kubectl apply -f k8s/backend-deployment.yml
+kubectl apply -f k8s/backend-service.yml
 
-- Extend a MERN-based application to build a variety of applications
-- Add real-time communication capabilities with Socket.IO
-- Implement data visualization features for React applications using Victory
-- Develop media streaming applications using MongoDB GridFS
-- Improve SEO for your MERN apps by implementing server-side rendering with data
-- Implement user authentication and authorization using JSON web tokens
-- Set up and use React 360 to develop user interfaces with VR capabilities
-- Make your MERN stack applications reliable and scalable with industry best practices
+# Deploy frontend
+kubectl apply -f k8s/frontend-deployment.yml
+kubectl apply -f k8s/frontend-service.yml
 
-If you feel this book is for you, get your [copy](https://www.amazon.com/dp/1839215410) today!
+# Deploy Mongo Express
+kubectl apply -f k8s/mongo-express-deployment.yml
+kubectl apply -f k8s/mongo-express-service.yml
 
----
+# Deploy Ingress
+kubectl apply -f k8s/ingress.yml
+```
+
+## Verify
+
+```bash
+# Check deployments
+kubectl get deployments
+
+# Check services
+kubectl get services
+
+# Check pods
+kubectl get pods
+
+# Check ingress
+kubectl get ingress
+```
+
+## Access
+
+```bash
+# Remove old entries
+sudo sed -i '/mern-app.local/d' /etc/hosts
+
+# Add new entry with Minikube IP
+echo "$(minikube ip) mern-app.local" | sudo tee -a /etc/hosts
+
+# Frontend: https://mern-app.local/
+# Backend API: https://mern-app.local/api/
+# Mongo Express: https://mern-app.local/mongo-express/
+```
+
+## Testing
+
+```bash
+# Test services
+kubectl get all
+
+# Check ingress status
+kubectl get ingress
+
+# Test frontend 
+curl -k https://mern-app.local/
+
+# Test backend 
+curl -k https://mern-app.local/api/
+
+# Test MongoDB 
+kubectl exec -it $(kubectl get pods -l app=mongodb -o jsonpath='{.items[0].metadata.name}') -- mongo --eval "db.adminCommand('ismaster')"
+
+# Test Mongo Express
+curl -k https://mern-app.local/mongo-express/
+```

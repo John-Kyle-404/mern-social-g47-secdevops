@@ -3,10 +3,10 @@ import {makeStyles} from '@material-ui/core/styles'
 import Card from '@material-ui/core/Card'
 import Typography from '@material-ui/core/Typography'
 import Divider from '@material-ui/core/Divider'
-import auth from './../auth/auth-helper'
-import PostList from './PostList'
+import auth from '../auth/auth-helper.js'
+import PostList from './PostList.js'
 import {listNewsFeed} from './api-post.js'
-import NewPost from './NewPost'
+import NewPost from './NewPost.js'
 
 const useStyles = makeStyles(theme => ({
   card: {
