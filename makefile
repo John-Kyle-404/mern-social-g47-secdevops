@@ -26,19 +26,12 @@ build:
 
 deploy:
 	kubectl apply -f $(K8S_DIR)/configmap.yml
-<<<<<<< HEAD
-	kubectl apply -f $(K8S_DIR)/tls-secret.yml
-	kubectl apply -f $(K8S_DIR)/all-deployments-services.yml
-	kubectl apply -f $(K8S_DIR)/ingress.yml
-	sudo sed -i '/mern-app.local/d' /etc/hosts 2>/dev/null || true
-	echo "$(MINIKUBE_IP) mern-app.local" | sudo tee -a /etc/hosts
-=======
 	kubectl create secret tls mern-tls-secret --cert=$(K8S_DIR)/tls.crt --key=$(K8S_DIR)/tls.key --dry-run=client -o yaml | kubectl apply -f -
 	kubectl apply -f $(K8S_DIR)/all-deployments-services.yml
 	kubectl apply -f $(K8S_DIR)/ingress.yml
 	@echo "Deployment complete. Add the following to your hosts file:"
 	@echo "$(MINIKUBE_IP) mern-app.local"
->>>>>>> 6ef44bd19680cdfdbde0b0551697e5042064419c
+
 
 status:
 	kubectl get configmaps
