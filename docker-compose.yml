@@ -30,6 +30,7 @@ services:
       - frontend
     environment:
       - MONGODB_URI=mongodb://admin:pass@mongodb:27017/auth?authSource=admin
+      - JWT_SECRET=MfT4V0B8BisFbo2/g5E+2wzyIguNeIcHu17B0ON/lkW46WGUk8ql1LXAKFyb2/IU9mGGL51fG2nS4R75bZCPaw==
 
   mongo:
     container_name: mongodb
